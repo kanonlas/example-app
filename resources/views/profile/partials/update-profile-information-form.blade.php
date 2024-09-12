@@ -58,13 +58,14 @@
         <h4 class="font-medium text-blue-900 dark:text-blue-100">
             {{ __('Personality Type Information ') }}
         </h4>
+
         <p class="mt-2 text-blue-900 dark:text-blue-100">
     @if($user->personality_types)
         {{ $user->personality_types->type }}, {{ $user->personality_types->description }}
     @else
         {{ 'No personality available' }}
     @endif
-</p>
+        </p>
 
         <!--status bio -->
 

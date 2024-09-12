@@ -52,11 +52,10 @@ class UserController extends Controller
     //     if (!$user) {
     //         return redirect()->route('profile.show-bio')->with('error', 'User not found.');
     //     }
-
     //     return view('user.profile', compact('user'));
     // }
 
-    public function showPersonalityType($id){
+        public function showPersonalityType($id){
         $user = User::with('PersonalityType')->find($id);
         return view('user.profile',compact('user'));
     }

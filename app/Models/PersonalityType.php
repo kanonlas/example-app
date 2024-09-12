@@ -15,7 +15,7 @@ class PersonalityType extends Model
     ];
     protected $casts = [
         'create_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'upd., lmated_at' => 'datetime',
     ];
 
     public function user()

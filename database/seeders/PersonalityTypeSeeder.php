@@ -37,6 +37,8 @@ class PersonalityTypeSeeder extends Seeder
 
         foreach ($personalityTypes as $type) {
             PersonalityType::firstOrCreate(['type' => $type['type']], $type);
+           // echo "Inserted/Updated: {$type['type']}\n";
         }
+        
     }
 }
