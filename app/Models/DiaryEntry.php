@@ -37,5 +37,29 @@ class DiaryEntry extends Model
     return view('diary.show', compact('diaryEntry'));
 }
 
+public function conflictingEmotions()
+{
+    $userId = Auth::id(); // Get the authenticated user's ID
+
+    // Fetch diary entries where the emotion is "Sad" (emotion_id = 2) and content contains "happy"
+    $entries = DB::table('diary_entries as de')
+        ->join('diary_entry_emotions as dee', 'de.id', '=', 'dee.diary_entry_id')
+        ->where('de.user_id', $userId)
+        ->where('dee.emotion_id', 2)
+        ->where('de.content', 'LIKE', '%happy%')
+        ->select('de.id', 'de.date', 'de.content')
+        ->get();
+
+    // Log the query for debugging
+    \Log::info('Conflicting emotions query:', [
+        'query' => DB::getQueryLog(),
+        'entries' => $entries
+    ]);
+
+    // Return the entries as a JSON response
+    return response()->json($entries);
+}
+
+
  
 }

@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\DiaryEntry; //เพิ่มบรรทัดนี้
-use Illuminate\Support\Facades\Auth; //เพิ่มบรรทัดนี้
+use App\Models\DiaryEntry; //ใช้ model DiaryEntry ได้ 
+use Illuminate\Support\Facades\Auth; // เชื่อมกับหน้า authen 
 use Illuminate\Http\Request;
 use App\Models\Emotion;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +34,8 @@ class DiaryEntryController extends Controller
        // Return the view with both diary entries and summary data
        return view('diary.index', compact('diaryEntries', 'summary'));
     }
+    
+
 
     /**
      * Show the form for creating a new resource.
@@ -43,28 +45,6 @@ class DiaryEntryController extends Controller
         $emotions = Emotion::all(); // Fetch all emotions for selection 
         return view('diary.create', compact('emotions')); // Pass emotions to the view 
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    // public function store(Request $request)
-    // {
-    //         $diaryEntry = Auth::user()->diaryEntries()->create([ 
-    //             'date' => $validated['date'], 
-    //             'content' => $validated['content'], 
-    //                 ]); 
-    
-    //                 if (!empty($validated['emotions']) && 
-    //                 !empty($validated['intensity'])) { 
-    //                 foreach ($validated['emotions'] as $emotionId) { 
-    //                             $intensity = $validated['intensity'][$emotionId] ?? null; 
-    //                 // Attach emotions and intensities to the diary entry 
-    //                             $diaryEntry->emotions()->attach($emotionId, ['intensity' => 
-    //                 $intensity]); 
-    //                         } 
-    //                     } 
-    //                 return redirect()->route('diary.index')->with('status', 'Diary entry added successfully!'); 
-    // }
 
     public function store(Request $request)
 {
@@ -161,18 +141,18 @@ class DiaryEntryController extends Controller
         return redirect()->route('diary.index')->with('status', 'Diary entry deleted successfully!'); 
     }
 
-    public function display_diary()
-    {
-       $userId = Auth::id(); // Get the authenticated user's ID
-       // Fetch all diary entries for the authenticated user
-       $diaryEntries = DB::table('diary_entries')
-           ->where('user_id', $userId)
-            ->get();  //ได้ List diary user 
-           //->first(); // get diary อันล่าสุดออกมา
-       return view('diary.display_diary', compact('diaryEntries')); //ได้ List diary user
-       //return response()->json($diaryEntries); // ออกมาเป็น  json เเทน
+    // public function display_diary()
+    // {
+    //    $userId = Auth::id(); // Get the authenticated user's ID
+    //    // Fetch all diary entries for the authenticated user
+    //    $diaryEntries = DB::table('diary_entries')
+    //        ->where('user_id', $userId)
+    //         ->get();  //ได้ List diary user 
+    //        //->first(); // get diary อันล่าสุดออกมา
+    //    //return view('diary.display_diary', compact('diaryEntries')); //ได้ List diary user
+    //    return response()->json($diaryEntries); // ออกมาเป็น  json เเทน
 
-    }
+    // }
 
     public function diary_count()
     {
@@ -188,15 +168,15 @@ class DiaryEntryController extends Controller
 
     // *********************** เอามาเเต่เนื้อหา diary *******************************
     
-    // public function display_diary()
-    // {
-    //     $userId = Auth::id(); // Get the authenticated user's ID
-    //     $contents = DB::table('diary_entries')
-    //         ->where('user_id', $userId)
-    //         ->pluck('content');
+    public function display_diary()
+    {
+        $userId = Auth::id(); // Get the authenticated user's ID
+        $contents = DB::table('diary_entries')
+            ->where('user_id', $userId)
+            ->pluck('content');
         
-    //     return response()->json($contents);
-    // }  
+        return response()->json($contents);
+    }  
 
     // ******************************************************
 
@@ -211,4 +191,35 @@ class DiaryEntryController extends Controller
            ->count('de.id');
        return response()->json(['happyEmotionCount' => $happyEmotionCount]);
     }
+
+    public function count_sad_diary()
+    {
+       $userId = Auth::id();
+       $sadEmotionCount = DB::table('users as u')
+           ->join('diary_entries as de', 'u.id', '=', 'de.user_id')
+           ->join('diary_entry_emotions as dee', 'de.id', '=', 'dee.diary_entry_id')
+           ->where('u.id', $userId)
+           ->where('dee.emotion_id', 2)
+           ->count('de.id');
+       return response()->json(['sadEmotionCount' => $sadEmotionCount]);
+    }
+
+    public function conflictingEmotions()
+    {
+    $userId = Auth::id(); // Get the authenticated user's ID
+
+    // Fetch diary entries with emotion_id = 2 (Sad) and content containing 'happy'
+    $entries = DB::table('diary_entries as de')
+        ->join('diary_entry_emotions as dee', 'de.id', '=', 'dee.diary_entry_id')
+        ->join('emotions as nee', 'dee.emotion_id', '=', 'nee.id')
+        ->where('user_id', $userId)
+        ->where('emotion_id', 2) // Assuming 'emotion_id = 2' represents 'Sad'
+        ->where('content', 'like', '%happy%')
+        ->get();
+
+        return view('diary.conflicting_emotions', compact('entries'));
+        //return response()->json($entries);
+    }
+
+
 }
